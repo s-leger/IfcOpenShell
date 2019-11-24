@@ -399,8 +399,13 @@ class IfcParser():
             if m.type == 'ARRAY':
                 array = ArrayModifier()
                 world_rotation = obj.matrix_world.decompose()[1]
-                array.offset = world_rotation @ Vector(
-                    (m.constant_offset_displace[0], m.constant_offset_displace[1], m.constant_offset_displace[2]))
+                array.offset = Vector()
+                if m.use_relative_offset:
+                    x, y, z = m.relative_offset_displace[:3]
+                    sx, sy, sz = obj.dimensions
+                    array.offset += world_rotation @ Vector((x * sx, y * sy, z * sz))
+                if m.use_constant_offset:
+                    array.offset += world_rotation @ Vector(m.constant_offset_displace[:3])
                 if m.fit_type == 'FIXED_COUNT':
                     array.count = m.count
                 elif m.fit_type == 'FIT_LENGTH':
